@@ -1,0 +1,68 @@
+[project]
+name = "picture-catalog-app"
+version = "0.1.0"
+description = "Self-hosted family photo catalog backed by Dropbox"
+readme = "../README.md"
+requires-python = ">=3.11,<3.13"
+license = { text = "MIT" }
+authors = [{ name = "Randy Michak" }]
+
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "sqlalchemy>=2.0",
+    "alembic>=1.14",
+    "dropbox>=12.0",
+    "httpx>=0.27",
+    "python-multipart>=0.0.12",
+    "itsdangerous>=2.2",
+    "pillow>=11.0",
+    "imagehash>=4.3",
+    "apscheduler>=3.10",
+]
+
+[project.optional-dependencies]
+# ML deps live in their own group so the walking skeleton (Phase 1)
+# can install fast on a Mac without dragging in heavy/Windows-only wheels.
+# Add via:  uv pip install -e ".[ml-windows]"  (on the Windows host)
+#       or  uv pip install -e ".[ml-cpu]"      (on the Mac dev box)
+ml-windows = [
+    "insightface>=0.7",
+    "onnxruntime-directml>=1.20; sys_platform == 'win32'",
+    "numpy>=1.26",
+    "opencv-python-headless>=4.10",
+]
+ml-cpu = [
+    "insightface>=0.7",
+    "onnxruntime>=1.20",
+    "numpy>=1.26",
+    "opencv-python-headless>=4.10",
+]
+
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.7",
+    "mypy>=1.13",
+    "httpx>=0.27",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "SIM"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

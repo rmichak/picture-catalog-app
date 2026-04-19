@@ -30,6 +30,9 @@ yarn-error.log*
 frontend/dist/
 frontend/build/
 
+# TypeScript incremental build cache
+*.tsbuildinfo
+
 # --- Project-specific data (NEVER commit) ---
 # All runtime data lives under backend/data/ — catalog DB, thumbnails, face crops,
 # downloaded model files, Dropbox tokens, etc.
