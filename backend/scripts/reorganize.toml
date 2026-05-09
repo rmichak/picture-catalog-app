@@ -1,0 +1,45 @@
+# Default allowlist for the reorganize CLI.
+#
+# Override at runtime via:  reorganize <cmd> --config /path/to/your.toml
+#
+# Paths are interpreted relative to `source_root` (default: ~/Dropbox).
+# All include_dirs are walked recursively; anything under an exclude_dir is skipped.
+
+source_root = "~/Dropbox"
+dest_root = "~/Dropbox/Pictures-Organized"
+
+include_dirs = [
+    "Camera Uploads",
+    "Camera Uploads (1)",
+    "pictures",
+    "gallery pictures",
+    "Mobile Uploads",
+    "From Gina's Kitchen",
+]
+
+# Loose photo files at source_root that should be included even though we don't
+# walk source_root itself. List individual filenames (matched case-insensitively).
+include_root_files = [
+    "john2.JPG",
+]
+
+# Folders explicitly out of scope for family photo organization.
+# Anything in source_root not listed in include_dirs is *also* skipped — these are
+# only here for documentation and to safeguard against accidental include changes.
+exclude_dirs = [
+    "baking",
+    "Margaret Strada Photography",
+    "IT 431",
+    "IT 431 Rework",
+    "IT431",
+    "ITE 152 Course",
+    "NVCC",
+    "GMU",
+    "taxes",
+    "AWS Training",
+    "CodeArena",
+    "Apps",
+    "Mac",
+    "zti",
+    "Icon",
+]

@@ -126,10 +126,35 @@ picture-catalog-app/
 
 - **Phase 0** — repo bootstrap. ✅
 - **Phase 1** — walking skeleton: FastAPI backend, React UI, Dropbox OAuth, basic folder indexing into SQLite. ✅
-- **Phase 2** — thumbnail cache, perceptual hashing, dedupe review UI.
+- **Phase 1.5** — one-shot photo reorganization: dedupe + year/month bucketing into `Pictures-Organized/`. CLI shipped; runs on the Windows host (see [docs/CONTINUE-ON-WINDOWS.md](docs/CONTINUE-ON-WINDOWS.md)). 🔄
+- **Phase 2** — thumbnail cache, perceptual hashing, dedupe review UI (now reads from the organized tree).
 - **Phase 3** — InsightFace + ONNX Runtime/DirectML face pipeline; "Who is this?" learning loop.
 - **Phase 4** — auto event detection, multi-filter search (people + dates + events).
 - **Phase 5** — Windows Service install via NSSM, 15-min Dropbox poll, daily SQLite backup.
+
+## Reorganize CLI (Phase 1.5)
+
+A bulk one-shot tool for cleaning up the existing Dropbox photo collection
+*before* the catalog/face pipeline runs. Lives at
+`backend/scripts/reorganize.py`. **Must run on a host where Dropbox is
+fully synced locally with ≥31 GB free disk** — see the cross-machine
+handoff at [docs/CONTINUE-ON-WINDOWS.md](docs/CONTINUE-ON-WINDOWS.md).
+
+```bash
+python scripts/reorganize.py inventory   # walk + hash + EXIF + date
+python scripts/reorganize.py classify    # 3-layer dedupe grouping
+python scripts/reorganize.py plan        # write move-plan.csv for review
+python scripts/reorganize.py execute     # move files + quarantine dups
+python scripts/reorganize.py verify      # re-hash destination
+python scripts/reorganize.py status      # progress / pause / resume controls
+python scripts/reorganize.py pause
+python scripts/reorganize.py resume
+python scripts/reorganize.py undo <id>   # roll back a run via the audit table
+```
+
+Includes/excludes are in `backend/scripts/reorganize.toml`. The CLI is
+idempotent and resumable — Ctrl-C or `pause` triggers a clean flush; a
+hard kill at most loses the last few seconds of work.
 
 ## Developer commands
 

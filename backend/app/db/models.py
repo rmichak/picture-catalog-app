@@ -164,3 +164,57 @@ class DropboxCursor(Base):
 
 
 Index("ix_photos_taken_status", Photo.taken_at, Photo.status)
+
+
+class ReorganizeRun(Base):
+    """One row per invocation of a reorganize subcommand. Drives progress/pause/resume."""
+
+    __tablename__ = "reorganize_runs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    command: Mapped[str] = mapped_column(String, index=True)
+    status: Mapped[str] = mapped_column(String, default="running", index=True)
+
+    started_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+    files_total: Mapped[int] = mapped_column(Integer, default=0)
+    files_processed: Mapped[int] = mapped_column(Integer, default=0)
+    last_path_processed: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    config_snapshot: Mapped[str | None] = mapped_column(Text, nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
+class SourceFileAudit(Base):
+    """Ledger of every source file the reorganize tool has touched. Source of truth for undo."""
+
+    __tablename__ = "source_file_audit"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    run_id: Mapped[int | None] = mapped_column(
+        ForeignKey("reorganize_runs.id", ondelete="SET NULL"), index=True, nullable=True
+    )
+
+    original_path: Mapped[str] = mapped_column(Text, index=True)
+    target_path: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    action: Mapped[str] = mapped_column(String, index=True)
+    group_id: Mapped[str | None] = mapped_column(String, index=True, nullable=True)
+    is_canonical: Mapped[bool] = mapped_column(Boolean, default=False)
+    dup_layer: Mapped[str | None] = mapped_column(String, nullable=True)
+    date_source: Mapped[str | None] = mapped_column(String, nullable=True)
+
+    sha256: Mapped[str | None] = mapped_column(String, index=True, nullable=True)
+    phash: Mapped[str | None] = mapped_column(String, index=True, nullable=True)
+    size_bytes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    mtime_ts: Mapped[float | None] = mapped_column(Float, nullable=True)
+    width: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    height: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    taken_at: Mapped[datetime | None] = mapped_column(DateTime, index=True, nullable=True)
+
+    executed_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
+
+
+Index("ix_audit_sha256_action", SourceFileAudit.sha256, SourceFileAudit.action)
+Index("ix_audit_run_action", SourceFileAudit.run_id, SourceFileAudit.action)
